@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import authService from '@/services/authService';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,11 +21,11 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/register', { name, email, password });
-      login(data);
+      const userData = await authService.register({ name, email, password });
+      login(userData);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -35,9 +35,11 @@ export default function Register() {
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
       <div className="w-full max-w-md bg-slate-950/80 border border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto shadow-lg shadow-indigo-500/30 mb-3">
-            V
-          </div>
+          <img
+            src="/app_icon.png"
+            alt="Vrundavan Auto"
+            className="w-16 h-16 rounded-2xl object-cover mx-auto shadow-lg shadow-indigo-500/30 mb-3 border border-indigo-500/20"
+          />
           <h1 className="text-2xl font-black text-white tracking-tight">Create Executive Account</h1>
           <p className="text-xs text-slate-400 mt-1">Register to start managing dealership pipeline</p>
         </div>

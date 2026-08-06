@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import authService from '@/services/authService';
 
 const AuthContext = createContext();
 
@@ -15,20 +15,13 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true);
 
-  // Set default auth header for axios
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  } else {
-    delete axios.defaults.headers.common['Authorization'];
-  }
-
   useEffect(() => {
     const verifyUser = async () => {
       if (token) {
         try {
-          const { data } = await axios.get('/api/auth/me');
-          setUser(data);
-          localStorage.setItem('dealership_user', JSON.stringify(data));
+          const profile = await authService.getMe();
+          setUser(profile);
+          localStorage.setItem('dealership_user', JSON.stringify(profile));
         } catch (err) {
           logout();
         }
@@ -40,11 +33,11 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = (userData) => {
-    setUser(userData);
-    setToken(userData.token);
-    localStorage.setItem('dealership_user', JSON.stringify(userData));
-    localStorage.setItem('dealership_token', userData.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+    const { token: userToken, ...profileData } = userData;
+    setUser(profileData);
+    setToken(userToken);
+    localStorage.setItem('dealership_user', JSON.stringify(profileData));
+    localStorage.setItem('dealership_token', userToken);
   };
 
   const logout = () => {
@@ -52,7 +45,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('dealership_user');
     localStorage.removeItem('dealership_token');
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   const updateUser = (updatedData) => {

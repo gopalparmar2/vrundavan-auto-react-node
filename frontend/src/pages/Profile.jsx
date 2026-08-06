@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import authService from '@/services/authService';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -26,11 +26,11 @@ export default function Profile() {
     e.preventDefault();
     setInfoSubmitting(true);
     try {
-      const { data } = await axios.patch('/api/auth/profile', { name, email });
-      updateUser(data);
+      const updatedUser = await authService.updateProfile({ name, email });
+      updateUser(updatedUser);
       setToast({ type: 'success', message: 'Profile information updated!' });
     } catch (err) {
-      setToast({ type: 'error', message: err.response?.data?.message || 'Failed to update info' });
+      setToast({ type: 'error', message: err.message || 'Failed to update info' });
     } finally {
       setInfoSubmitting(false);
     }
@@ -40,15 +40,12 @@ export default function Profile() {
     e.preventDefault();
     setPasswordSubmitting(true);
     try {
-      await axios.patch('/api/auth/change-password', {
-        current_password: currentPassword,
-        new_password: newPassword
-      });
+      await authService.changePassword(currentPassword, newPassword);
       setToast({ type: 'success', message: 'Password changed successfully!' });
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
-      setToast({ type: 'error', message: err.response?.data?.message || 'Failed to change password' });
+      setToast({ type: 'error', message: err.message || 'Failed to change password' });
     } finally {
       setPasswordSubmitting(false);
     }

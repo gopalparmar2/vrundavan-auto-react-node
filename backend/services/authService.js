@@ -1,101 +1,97 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 class AuthService {
-  async register(userData) {
-    const { name, email, password, role, phone } = userData;
+  generateToken(id) {
+    return jwt.sign(
+      { id },
+      process.env.JWT_SECRET || 'vehicle_dealership_jwt_secret_key_2026',
+      { expiresIn: '30d' }
+    );
+  }
 
-    const existingUser = await User.findOne({ email });
+  async register({ name, email, password, role }) {
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      throw { statusCode: 400, message: 'Email already registered' };
+      throw { statusCode: 400, message: 'User with this email already exists' };
     }
 
     const salt = await bcrypt.genSalt(10);
-    const password_hash = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = new User({
+    const user = await User.create({
       name,
-      email,
-      password_hash,
-      role: role || 'sales_executive',
-      phone: phone || ''
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      role: role || 'sales'
     });
 
-    await user.save();
-
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET || 'supersecretkey_vehicle_dealership',
-      { expiresIn: '7d' }
-    );
+    const token = this.generateToken(user._id);
 
     return {
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone
-      }
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      theme: user.theme,
+      token
     };
   }
 
   async login(email, password) {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      throw { statusCode: 400, message: 'Invalid credentials' };
+      throw { statusCode: 401, message: 'Invalid email or password' };
     }
 
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw { statusCode: 400, message: 'Invalid credentials' };
+      throw { statusCode: 401, message: 'Invalid email or password' };
     }
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET || 'supersecretkey_vehicle_dealership',
-      { expiresIn: '7d' }
-    );
+    const token = this.generateToken(user._id);
 
     return {
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone
-      }
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      theme: user.theme,
+      token
     };
   }
 
   async getUserProfile(userId) {
-    const user = await User.findById(userId).select('-password_hash');
+    const user = await User.findById(userId).select('-password');
     if (!user) {
-      throw { statusCode: 404, message: 'User not found' };
+      throw { statusCode: 404, message: 'User profile not found' };
     }
-    return user;
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      theme: user.theme
+    };
   }
 
-  async updateProfile(userId, updateData) {
-    const { name, phone } = updateData;
+  async updateProfile(userId, { name, email }) {
     const user = await User.findById(userId);
     if (!user) {
       throw { statusCode: 404, message: 'User not found' };
     }
 
     if (name) user.name = name;
-    if (phone !== undefined) user.phone = phone;
+    if (email) user.email = email.toLowerCase();
 
-    await user.save();
+    const updated = await user.save();
     return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone
+      _id: updated._id,
+      name: updated.name,
+      email: updated.email,
+      role: updated.role,
+      theme: updated.theme
     };
   }
 
@@ -105,17 +101,32 @@ class AuthService {
       throw { statusCode: 404, message: 'User not found' };
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       throw { statusCode: 400, message: 'Current password is incorrect' };
     }
 
     const salt = await bcrypt.genSalt(10);
-    user.password_hash = await bcrypt.hash(newPassword, salt);
+    user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
     return { message: 'Password updated successfully' };
   }
+
+  async updateTheme(userId, theme) {
+    if (!['dark', 'light'].includes(theme)) {
+      throw { statusCode: 400, message: 'Invalid theme value' };
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      throw { statusCode: 404, message: 'User not found' };
+    }
+
+    user.theme = theme;
+    await user.save();
+
+    return { theme: user.theme };
+  }
 }
 
-module.exports = new AuthService();
+export default new AuthService();

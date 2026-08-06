@@ -116,9 +116,16 @@ export default function Models() {
       label: 'Model Name',
       sortable: true,
       render: (row) => (
-        <div>
-          <div className="font-bold text-slate-800 dark:text-slate-100">{row.name}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">{row.variant}</div>
+        <div className="flex items-center gap-3">
+          <img
+            src={row.image || '/app_icon.png'}
+            alt={row.name}
+            className="w-8 h-8 rounded-xl object-cover border border-indigo-100 dark:border-indigo-900/40 flex-shrink-0"
+          />
+          <div>
+            <div className="font-bold text-slate-800 dark:text-slate-100">{row.name}</div>
+            <div className="text-[11px] text-slate-400 mt-0.5">{row.variant}</div>
+          </div>
         </div>
       ),
     },

@@ -90,9 +90,11 @@ export default function Brands() {
       sortable: true,
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-sm flex-shrink-0">
-            {row.name.charAt(0)}
-          </div>
+          <img
+            src={row.logo || '/app_icon.png'}
+            alt={row.name}
+            className="w-8 h-8 rounded-xl object-cover border border-indigo-100 dark:border-indigo-900/40 flex-shrink-0"
+          />
           <span className="font-bold text-slate-800 dark:text-slate-100">{row.name}</span>
         </div>
       ),

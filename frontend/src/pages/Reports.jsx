@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import reportService from '@/services/reportService';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,10 +21,14 @@ export default function Reports() {
 
   const fetchReports = async () => {
     try {
-      const res = await axios.get('/api/reports', {
-        params: { start_date: startDate, end_date: endDate, status: statusFilter }
+      const data = await reportService.getReports({
+        start_date: startDate,
+        end_date: endDate,
+        status: statusFilter
       });
-      setReportData(res.data);
+      if (data) {
+        setReportData(data);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -38,12 +42,12 @@ export default function Reports() {
 
   const handleExportCsv = async () => {
     try {
-      const response = await axios.get('/api/reports/export/csv', {
-        params: { start_date: startDate, end_date: endDate, status: statusFilter },
-        responseType: 'blob'
+      const blob = await reportService.exportCsv({
+        start_date: startDate,
+        end_date: endDate,
+        status: statusFilter
       });
-      const blob = new Blob([response.data], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/csv' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'dealership_sales_report.csv');
@@ -58,12 +62,12 @@ export default function Reports() {
 
   const handleExportPdf = async () => {
     try {
-      const response = await axios.get('/api/reports/export/pdf', {
-        params: { start_date: startDate, end_date: endDate, status: statusFilter },
-        responseType: 'blob'
+      const blob = await reportService.exportPdf({
+        start_date: startDate,
+        end_date: endDate,
+        status: statusFilter
       });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'dealership_sales_report.pdf');

@@ -12,6 +12,7 @@ import inquiryRoutes from './routes/inquiries.js';
 import estimateRoutes from './routes/estimates.js';
 import dashboardRoutes from './routes/dashboard.js';
 import reportRoutes from './routes/reports.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
@@ -41,6 +42,9 @@ app.use('/api/reports', reportRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Vehicle Dealership API Server Running' });
 });
+
+// Centralized Error Handling Middleware
+app.use(errorHandler);
 
 // Connect Database & Start Server
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/vehicle_dealership';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import inquiryService from '@/services/inquiryService';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -31,9 +31,11 @@ export default function InquiryDetail() {
 
   const fetchInquiryDetails = async () => {
     try {
-      const res = await axios.get(`/api/inquiries/${id}`);
-      setInquiry(res.data.inquiry);
-      setStatusLogs(res.data.statusLogs);
+      const data = await inquiryService.getInquiryById(id);
+      if (data) {
+        setInquiry(data.inquiry);
+        setStatusLogs(data.statusLogs || []);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -48,7 +50,7 @@ export default function InquiryDetail() {
   const handleStatusChange = async (newStatus) => {
     setUpdating(true);
     try {
-      await axios.patch(`/api/inquiries/${id}/status`, { status: newStatus });
+      await inquiryService.updateStatus(id, newStatus);
       setToast({ type: 'success', message: `Status updated to ${newStatus}` });
       fetchInquiryDetails();
     } catch (err) {

@@ -55,9 +55,11 @@ export default function Navigation({ isMobileOpen, setIsMobileOpen, collapsed })
         {/* Brand Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80">
           <Link to="/dashboard" className="flex items-center space-x-3 overflow-hidden group">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-lg flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
-              V
-            </div>
+            <img
+              src="/app_icon.png"
+              alt="Vrundavan Auto"
+              className="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200 border border-indigo-500/20"
+            />
             {!collapsed && (
               <div className="flex flex-col truncate">
                 <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
@@ -119,9 +121,11 @@ export default function Navigation({ isMobileOpen, setIsMobileOpen, collapsed })
           <div className="relative w-4/5 max-w-xs bg-white dark:bg-slate-900 h-full flex flex-col shadow-2xl z-10 border-r border-slate-200 dark:border-slate-800">
             <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base">
-                  V
-                </div>
+                <img
+                  src="/app_icon.png"
+                  alt="Vrundavan Auto"
+                  className="w-9 h-9 rounded-xl object-cover border border-indigo-500/20"
+                />
                 <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
                   Vrundavan Auto
                 </span>

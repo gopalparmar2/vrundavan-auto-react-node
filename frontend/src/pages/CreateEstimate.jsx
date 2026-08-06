@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import inquiryService from '@/services/inquiryService';
+import estimateService from '@/services/estimateService';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,12 +29,14 @@ export default function CreateEstimate() {
   useEffect(() => {
     const fetchInquiry = async () => {
       try {
-        const res = await axios.get(`/api/inquiries/${id}`);
-        setInquiry(res.data.inquiry);
-        const price = Number(res.data.inquiry.model?.on_road_price || 0);
-        setOnRoadPrice(price);
-        setInsurance(Math.round(price * 0.03)); // default ~3% insurance estimate
-        setRtoCharges(Math.round(price * 0.08)); // default ~8% RTO estimate
+        const data = await inquiryService.getInquiryById(id);
+        if (data && data.inquiry) {
+          setInquiry(data.inquiry);
+          const price = Number(data.inquiry.model?.on_road_price || 0);
+          setOnRoadPrice(price);
+          setInsurance(Math.round(price * 0.03)); // default ~3% insurance estimate
+          setRtoCharges(Math.round(price * 0.08)); // default ~8% RTO estimate
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -49,7 +52,7 @@ export default function CreateEstimate() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const { data } = await axios.post('/api/estimates', {
+      const estimate = await estimateService.createEstimate({
         inquiry_id: id,
         on_road_price: onRoadPrice,
         discount,
@@ -57,10 +60,10 @@ export default function CreateEstimate() {
         insurance,
         rto_charges: rtoCharges
       });
-      setGeneratedEstimate(data);
+      setGeneratedEstimate(estimate);
       setToast({ type: 'success', message: 'Estimate generated successfully!' });
     } catch (err) {
-      setToast({ type: 'error', message: err.response?.data?.message || 'Failed to generate estimate' });
+      setToast({ type: 'error', message: err.message || 'Failed to generate estimate' });
     } finally {
       setSubmitting(false);
     }
@@ -68,11 +71,8 @@ export default function CreateEstimate() {
 
   const handleDownloadPdf = async (estimateId) => {
     try {
-      const response = await axios.get(`/api/estimates/${estimateId}/download`, {
-        responseType: 'blob'
-      });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+      const blob = await estimateService.downloadEstimatePdf(estimateId);
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `Estimate_${estimateId}.pdf`);

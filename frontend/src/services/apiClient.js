@@ -8,7 +8,7 @@ const apiClient = axios.create({
 // Attach JWT token to every request
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('dealership_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

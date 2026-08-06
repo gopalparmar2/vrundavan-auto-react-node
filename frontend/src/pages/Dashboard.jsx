@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import dashboardService from '@/services/dashboardService';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -37,8 +37,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await axios.get('/api/dashboard');
-        setData(res.data);
+        const stats = await dashboardService.getDashboardData();
+        if (stats) {
+          setData(stats);
+        }
       } catch (err) {
         console.error('Error fetching dashboard:', err);
       } finally {

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { sendError } from '../utils/responseHelper.js';
 
 export const protect = async (req, res, next) => {
   let token;
@@ -9,15 +10,15 @@ export const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'vehicle_dealership_jwt_secret_key_2026');
       req.user = await User.findById(decoded.id).select('-password');
       if (!req.user) {
-        return res.status(401).json({ message: 'User no longer exists' });
+        return sendError(res, 'User no longer exists', 401);
       }
       return next();
     } catch (error) {
-      return res.status(401).json({ message: 'Not authorized, token failed' });
+      return sendError(res, 'Not authorized, token failed', 401);
     }
   }
 
   if (!token) {
-    return res.status(401).json({ message: 'Not authorized, no token provided' });
+    return sendError(res, 'Not authorized, no token provided', 401);
   }
 };

@@ -10,7 +10,7 @@
  * @param {number} statusCode HTTP status code (default: 200)
  * @param {object} meta Additional metadata properties (e.g. pagination)
  */
-const sendSuccess = (res, data = null, message = 'Success', statusCode = 200, meta = {}) => {
+export const sendSuccess = (res, data = null, message = 'Success', statusCode = 200, meta = {}) => {
   return res.status(statusCode).json({
     success: true,
     message,
@@ -19,14 +19,7 @@ const sendSuccess = (res, data = null, message = 'Success', statusCode = 200, me
   });
 };
 
-/**
- * Send a standardized error JSON response
- * @param {Response} res Express response object
- * @param {string} message Error description message
- * @param {number} statusCode HTTP status code (default: 500)
- * @param {any} errors Specific field errors or error details
- */
-const sendError = (res, message = 'Internal Server Error', statusCode = 500, errors = null) => {
+export const sendError = (res, message = 'Internal Server Error', statusCode = 500, errors = null) => {
   return res.status(statusCode).json({
     success: false,
     message,
@@ -34,7 +27,3 @@ const sendError = (res, message = 'Internal Server Error', statusCode = 500, err
   });
 };
 
-module.exports = {
-  sendSuccess,
-  sendError
-};
