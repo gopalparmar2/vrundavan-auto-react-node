@@ -12,6 +12,7 @@ import inquiryRoutes from './routes/inquiries.js';
 import estimateRoutes from './routes/estimates.js';
 import dashboardRoutes from './routes/dashboard.js';
 import reportRoutes from './routes/reports.js';
+import uploadRoutes from './routes/upload.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -27,8 +28,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static upload directory if any
+// Serve static upload and asset directories
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -38,6 +40,7 @@ app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/estimates', estimateRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Vehicle Dealership API Server Running' });

@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { deleteUploadFile } from '../utils/fileHelper.js';
 
 class AuthService {
   generateToken(id) {
@@ -35,6 +36,7 @@ class AuthService {
       email: user.email,
       role: user.role,
       theme: user.theme,
+      avatar: user.avatar || '',
       token
     };
   }
@@ -58,6 +60,7 @@ class AuthService {
       email: user.email,
       role: user.role,
       theme: user.theme,
+      avatar: user.avatar || '',
       token
     };
   }
@@ -72,11 +75,12 @@ class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
-      theme: user.theme
+      theme: user.theme,
+      avatar: user.avatar || ''
     };
   }
 
-  async updateProfile(userId, { name, email }) {
+  async updateProfile(userId, { name, email, avatar }) {
     const user = await User.findById(userId);
     if (!user) {
       throw { statusCode: 404, message: 'User not found' };
@@ -84,6 +88,12 @@ class AuthService {
 
     if (name) user.name = name;
     if (email) user.email = email.toLowerCase();
+    if (avatar !== undefined) {
+      if (user.avatar && user.avatar !== avatar) {
+        deleteUploadFile('users', user.avatar);
+      }
+      user.avatar = avatar;
+    }
 
     const updated = await user.save();
     return {
@@ -91,7 +101,8 @@ class AuthService {
       name: updated.name,
       email: updated.email,
       role: updated.role,
-      theme: updated.theme
+      theme: updated.theme,
+      avatar: updated.avatar || ''
     };
   }
 

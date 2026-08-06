@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from './AuthContext';
-import axios from 'axios';
+import apiClient from '@/services/apiClient';
 
 const ThemeContext = createContext();
 
@@ -36,7 +36,7 @@ export const ThemeProvider = ({ children }) => {
     if (user) {
       updateUser({ theme: nextTheme });
       try {
-        await axios.patch('/api/auth/theme', { theme: nextTheme });
+        await apiClient.patch('/auth/theme', { theme: nextTheme });
       } catch (err) {
         console.error('Failed to sync theme with backend:', err);
       }
@@ -50,7 +50,7 @@ export const ThemeProvider = ({ children }) => {
     if (user) {
       updateUser({ theme: newTheme });
       try {
-        await axios.patch('/api/auth/theme', { theme: newTheme });
+        await apiClient.patch('/auth/theme', { theme: newTheme });
       } catch (err) {
         console.error('Failed to sync theme with backend:', err);
       }

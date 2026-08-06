@@ -10,6 +10,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Plus, Edit, Trash2, Car, Gauge } from 'lucide-react';
 import modelService from '@/services/modelService';
 import brandService from '@/services/brandService';
+import ImageUpload from '@/components/ImageUpload';
 
 const fuelColors = {
   Petrol: 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border-orange-200/60 dark:border-orange-900/40',
@@ -28,7 +29,7 @@ export default function Models() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingModel, setEditingModel] = useState(null);
-  const [formData, setFormData] = useState({ brand_id: '', name: '', variant: '', on_road_price: '', ex_showroom_price: '', fuel_type: 'Petrol', transmission: 'Manual' });
+  const [formData, setFormData] = useState({ brand_id: '', name: '', variant: '', on_road_price: '', ex_showroom_price: '', fuel_type: 'Petrol', transmission: 'Manual', image: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -50,13 +51,13 @@ export default function Models() {
 
   const handleOpenCreate = () => {
     setEditingModel(null);
-    setFormData({ brand_id: brands[0]?._id || '', name: '', variant: '', on_road_price: '', ex_showroom_price: '', fuel_type: 'Petrol', transmission: 'Manual' });
+    setFormData({ brand_id: brands[0]?._id || '', name: '', variant: '', on_road_price: '', ex_showroom_price: '', fuel_type: 'Petrol', transmission: 'Manual', image: '' });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (model) => {
     setEditingModel(model);
-    setFormData({ brand_id: model.brand?._id || model.brand, name: model.name, variant: model.variant, on_road_price: model.on_road_price, ex_showroom_price: model.ex_showroom_price || '', fuel_type: model.fuel_type, transmission: model.transmission });
+    setFormData({ brand_id: model.brand?._id || model.brand, name: model.name, variant: model.variant, on_road_price: model.on_road_price, ex_showroom_price: model.ex_showroom_price || '', fuel_type: model.fuel_type, transmission: model.transmission, image: model.image || '' });
     setIsModalOpen(true);
   };
 
@@ -239,6 +240,12 @@ export default function Models() {
                 <Input type="number" placeholder="2350000" value={formData.ex_showroom_price} onChange={(e) => setFormData({ ...formData, ex_showroom_price: e.target.value })} />
               </div>
             </div>
+            <ImageUpload
+              label="Vehicle Model Image"
+              type="models"
+              value={formData.image}
+              onChange={(imgVal) => setFormData({ ...formData, image: imgVal })}
+            />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>Fuel Type</Label>

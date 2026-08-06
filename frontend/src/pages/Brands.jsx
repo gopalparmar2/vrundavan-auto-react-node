@@ -9,6 +9,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DataTable } from '@/components/ui/data-table';
 import { Plus, Edit, Trash2, Tag } from 'lucide-react';
 import brandService from '@/services/brandService';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function Brands() {
   const [brands, setBrands] = useState([]);
@@ -172,6 +173,12 @@ export default function Brands() {
               <Label>Brand Name</Label>
               <Input type="text" placeholder="e.g. Tata Motors" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
             </div>
+            <ImageUpload
+              label="Brand Logo"
+              type="brands"
+              value={formData.logo}
+              onChange={(logoVal) => setFormData({ ...formData, logo: logoVal })}
+            />
             <div className="space-y-1.5">
               <Label>Status</Label>
               <Select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>

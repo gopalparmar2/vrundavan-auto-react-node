@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, Lock, Moon, Sun } from 'lucide-react';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
@@ -14,6 +15,7 @@ export default function Profile() {
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [avatar, setAvatar] = useState(user?.avatar || '');
   const [infoSubmitting, setInfoSubmitting] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -26,7 +28,7 @@ export default function Profile() {
     e.preventDefault();
     setInfoSubmitting(true);
     try {
-      const updatedUser = await authService.updateProfile({ name, email });
+      const updatedUser = await authService.updateProfile({ name, email, avatar });
       updateUser(updatedUser);
       setToast({ type: 'success', message: 'Profile information updated!' });
     } catch (err) {
@@ -72,6 +74,13 @@ export default function Profile() {
             </h3>
 
             <form onSubmit={handleUpdateInfo} className="space-y-4">
+              <ImageUpload
+                label="Admin Profile Picture / Avatar"
+                type="users"
+                value={avatar}
+                onChange={(avatarVal) => setAvatar(avatarVal)}
+              />
+
               <div className="space-y-1.5">
                 <Label>Full Name</Label>
                 <Input

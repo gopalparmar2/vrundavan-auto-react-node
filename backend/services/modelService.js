@@ -1,4 +1,5 @@
 import VehicleModel from '../models/VehicleModel.js';
+import { deleteUploadFile } from '../utils/fileHelper.js';
 
 class ModelService {
   async getAllModels(filter = {}) {
@@ -33,6 +34,7 @@ class ModelService {
   async updateModel(id, { brand_id, name, variant, on_road_price, ex_showroom_price, fuel_type, transmission, image }) {
     const model = await VehicleModel.findById(id);
     if (!model) throw { statusCode: 404, message: 'Vehicle model not found' };
+
     if (brand_id) model.brand = brand_id;
     if (name) model.name = name;
     if (variant) model.variant = variant;
@@ -40,7 +42,12 @@ class ModelService {
     if (ex_showroom_price !== undefined) model.ex_showroom_price = Number(ex_showroom_price);
     if (fuel_type) model.fuel_type = fuel_type;
     if (transmission) model.transmission = transmission;
-    if (image !== undefined) model.image = image;
+    if (image !== undefined) {
+      if (model.image && model.image !== image) {
+        deleteUploadFile('models', model.image);
+      }
+      model.image = image;
+    }
     await model.save();
     return await VehicleModel.findById(model._id).populate('brand', 'name logo status');
   }
@@ -48,6 +55,9 @@ class ModelService {
   async deleteModel(id) {
     const model = await VehicleModel.findById(id);
     if (!model) throw { statusCode: 404, message: 'Vehicle model not found' };
+    if (model.image) {
+      deleteUploadFile('models', model.image);
+    }
     await model.deleteOne();
     return { message: 'Vehicle model deleted' };
   }

@@ -1,5 +1,6 @@
 import Brand from '../models/Brand.js';
 import VehicleModel from '../models/VehicleModel.js';
+import { deleteUploadFile } from '../utils/fileHelper.js';
 
 class BrandService {
   async getAllBrands(filter = {}) {
@@ -24,8 +25,14 @@ class BrandService {
   async updateBrand(id, { name, logo, status }) {
     const brand = await Brand.findById(id);
     if (!brand) throw { statusCode: 404, message: 'Brand not found' };
+
     if (name) brand.name = name;
-    if (logo !== undefined) brand.logo = logo;
+    if (logo !== undefined) {
+      if (brand.logo && brand.logo !== logo) {
+        deleteUploadFile('brands', brand.logo);
+      }
+      brand.logo = logo;
+    }
     if (status) brand.status = status;
     return await brand.save();
   }
@@ -33,7 +40,19 @@ class BrandService {
   async deleteBrand(id) {
     const brand = await Brand.findById(id);
     if (!brand) throw { statusCode: 404, message: 'Brand not found' };
+
+    // Delete associated vehicle model images
+    const models = await VehicleModel.find({ brand: brand._id });
+    models.forEach((m) => {
+      if (m.image) deleteUploadFile('models', m.image);
+    });
     await VehicleModel.deleteMany({ brand: brand._id });
+
+    // Delete brand logo
+    if (brand.logo) {
+      deleteUploadFile('brands', brand.logo);
+    }
+
     await brand.deleteOne();
     return { message: 'Brand and associated models deleted' };
   }
